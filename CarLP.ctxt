@@ -1,0 +1,10 @@
+#BlueJ class context
+comment0.params=entryDate\ entryTime\ lp
+comment0.target=CarLP(int,\ double,\ java.lang.String)
+comment1.params=licencePlate
+comment1.target=void\ setLicencePlate(java.lang.String)
+comment2.params=
+comment2.target=java.lang.String\ getLicencePlate()
+comment3.params=
+comment3.target=java.lang.String\ toString()
+numComments=4
