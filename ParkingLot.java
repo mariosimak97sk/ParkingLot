@@ -1,19 +1,84 @@
-import java.util.Scanner;
-import java.util.Random;
+import java.util.*;
+import javax.swing.*;
+import java.awt.event.*;
 
-public class ParkingLot
+public class ParkingLot extends JFrame implements ActionListener
 {
-
-    private String name;
-    private int capacity;
+    private String name, dateString;
+    private int capacity, numOfOccupied, dateInt;
     private Car[] places;
-    private int numOfOccupied;
+    private String[] date;
+    private JButton btEnter, btLeave, btPay, btDisplay, btExit;
+    private JTextArea display;
+    private JLabel lbName, lbCapacity;
+    //javax.swing.Timer myTimer;
+    long duration;
 
     public ParkingLot(String name, int capacity) {
+        super(name + " | Mario Simak");
+        this.setLayout(null);
         this.name = name;
         this.capacity = capacity;
         numOfOccupied = 0;
         places = new Car[capacity];
+        //myTimer = new javax.swing.Timer(500,this);
+        //myTimer.stop();
+
+        //TEXTAREA
+        display = new JTextArea();
+        JScrollPane sp = new JScrollPane(display);
+        sp.setBounds(130, 50, 340, 190);
+        add(sp);
+
+        //CALENDAR
+        Calendar cal = Calendar.getInstance();
+        String[] aparts = cal.getTime().toString().split(" ");
+        String[] atime = aparts[3].split(":");
+        date = new String[3];
+        date[2] = Integer.toString(cal.get(Calendar.YEAR));
+        date[1] = Integer.toString(cal.get(Calendar.MONTH)+1);
+        date[0] = Integer.toString(cal.get(Calendar.DAY_OF_MONTH));
+        dateString = date[0] + date[1] + date[2];
+        dateInt = Integer.parseInt(dateString);
+
+        //BUTTONS
+        btEnter = new JButton("Enter");
+        btEnter.setBounds(20, 50, 100, 30);
+        add(btEnter);
+        btLeave = new JButton("Leave");
+        btLeave.setBounds(20, 90, 100, 30);
+        add(btLeave);
+        btPay = new JButton("Pay");
+        btPay.setBounds(20, 130, 100, 30);
+        add(btPay);
+        btDisplay = new JButton("Display");
+        btDisplay.setBounds(20, 170, 100, 30);
+        add(btDisplay);
+        btExit = new JButton("Exit");
+        btExit.setBounds(20, 210, 100, 30);
+        add(btExit);
+
+        //ACTIONLISTENER
+        btEnter.addActionListener(this);
+        btLeave.addActionListener(this);
+        btPay.addActionListener(this);
+        btDisplay.addActionListener(this);
+        btExit.addActionListener(this);
+
+        //LABELS
+        lbName = new JLabel(name);
+        lbName.setBounds(20, 20, 100, 30);
+        add(lbName);
+        lbCapacity = new JLabel("Capacity: " + numOfOccupied + "/" + capacity);
+        lbCapacity.setBounds(130, 20, 100, 30);
+        add(lbCapacity);
+
+        /*LOGO
+        ImageIcon logo = new ImageIcon("C:/Users/Mario Simak/Downloads/bhi_parking_banner.jpg");
+        JLabel lbLogo = new JLabel("Hit boxes", logo, JLabel.CENTER);
+        lbLogo.setBounds(0, 0, 480, 150);
+        this.add(lbLogo);
+         */
     }
 
     public int getRandom() {
@@ -28,25 +93,30 @@ public class ParkingLot
     public void enter () {
 
         if(numOfOccupied < capacity) {
-            System.out.println("You can enter.");
+            display.append("You can enter." + "\n");
+
         }else{
-            System.out.println("The ParkingLot is full.");
+            display.append("The ParkingLot is full." + "\n");
+            btEnter.setEnabled(false);
         }
 
         if(numOfOccupied < capacity) {
             int number = getRandom();
-            places[number] = new Car(MyInput.JOptionPaneInt("Enter date: "), MyInput.JOptionPaneDouble("Enter time: "));
-            System.out.println("Your number is: " + number);
             numOfOccupied++;
+            lbCapacity.setText("Capacity: " + numOfOccupied + "/" + capacity);
+            places[number] = new Car(dateInt, MyInput.JOptionPaneDouble("Enter time: "));
+            display.append("Your number is: " + number + "\n");
         }
     }
 
-    public void pay (int numOfCar) {
+    public void pay () {
 
         try{
-            places[numOfCar].payment(MyInput.JOptionPaneInt("Enter endDate: "), MyInput.JOptionPaneDouble("Enter endTime: "));
+            //MyInput.JOptionPaneDouble("Enter endTime: ")
+            int numOfCar = MyInput.JOptionPaneInt("Enter numOfCar: ");
+            places[numOfCar].payment(dateInt, MyInput.JOptionPaneDouble("Enter endTime: "));
             places[numOfCar].setPrice(0);
-            System.out.println("Paid. You can now leave.");
+            display.append("Paid: " + places[numOfCar].getPrice() +  " You can now leave." + "\n");
             //return true;
         }
         catch(NullPointerException npe){
@@ -59,17 +129,16 @@ public class ParkingLot
         }
     }
 
-    public void leave (int numOfCar) {
-        /* The machine checks whether there is a car at the place which is
-         * selected by the driver. If there is a car, then the machine checks if the car is allowed to leave. A car is
-         * allowed to leave if it leaves maximum 10 minutes after the payment was made. */
-        try{
-            if(places[numOfCar] != null && places[numOfCar].leave(MyInput.JOptionPaneInt("Enter endDate: "), MyInput.JOptionPaneDouble("Enter endTime: ")) ) {
-                places[numOfCar] = null;
+    public void leave () {
+
+        try{    
+            int numOfCar2 = MyInput.JOptionPaneInt("Enter numOfCar: ");
+            if(places[numOfCar2] != null && places[numOfCar2].leave(dateInt, MyInput.JOptionPaneDouble("Enter endTime: ")) ) {
+                places[numOfCar2] = null;
                 numOfOccupied--;
-                System.out.println("You left the ParkingLot.");
+                display.append("You left the ParkingLot." + "\n");
             }else{
-                System.out.println("You have to pay at first.");
+                display.append("You have to pay at first." + "\n");
             }
         }
         catch(NullPointerException npe){
@@ -80,39 +149,39 @@ public class ParkingLot
         }
     }
 
-    public void menu () {
-        int input;
-
-        do {
-            System.out.println("");
-            System.out.println(" 1. Enter the Parking Lot \n 2. Leave the Parking Lot \n 3. Make a payment  \n 4. Display the list of cars \n 5. Quit the menu \n");
-            input = MyInput.inputInt("Select an option from the menu: ");
-
-            switch (input) {
-                case 1:  
-                enter();
-                break;
-
-                case 2:  
-                if(numOfOccupied != 0) {
-                    leave(MyInput.inputInt("Fill in a number of your car: "));
-                }
-                break;
-
-                case 3:  
-                pay(MyInput.inputInt("Fill in a number of your car: "));
-                break;
-
-                case 4:  
-                for(int i = 0; i < capacity; i++) {
-                    if(places[i] != null) System.out.println(i + " : " + places[i].toString());
-                }
-                break;
-
-                default: 
-                System.out.println("Exit.");
-                break;
+    public void actionPerformed(ActionEvent ae) {
+        if(ae.getSource() == btEnter) {
+            enter();
+        }else if(ae.getSource() == btLeave) {
+            if(numOfOccupied != 0) {
+                leave();
             }
-        } while (input != 5);
+        }else if(ae.getSource() == btPay) {
+            pay();
+        }else if(ae.getSource() == btDisplay) {
+
+            for(int i = 0; i < capacity; i++) {
+                if(places[i] != null)  display.append((i + " : " + places[i].toString())+ "\n");
+            }
+
+        }else if(ae.getSource() == btExit) {
+            int result = JOptionPane.showConfirmDialog(null,"Are you sure you want to quit?","Confirm Quit", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.YES_OPTION) System.exit(0);
+        }
+
+        /* if(ae.getSource() == myTimer){
+        myTimer.stop();
+        System.out.println(myTimer);
+        myTimer.start();
+        }
+         */
+    }
+
+    public static void main() {
+        ParkingLot frame = new ParkingLot(MyInput.JOptionPaneString("Name of ParkingLot: "), MyInput.JOptionPaneInt("Capacity: "));
+        frame.setSize(500, 400);
+        frame.setVisible(true);
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(null);
     }
 }

@@ -20,14 +20,16 @@ public class MyInput
         System.out.print(message);
         return javain.nextLine().trim();
     }
-    
+
     public static int JOptionPaneInt (String message) {
-        String valueString = JOptionPane.showInputDialog(null, message , "Input", JOptionPane.PLAIN_MESSAGE);
-        return Integer.parseInt(valueString.trim());
+        return Integer.parseInt(JOptionPane.showInputDialog(null, message , "Input", JOptionPane.PLAIN_MESSAGE).trim());
+    }
+
+    public static double JOptionPaneDouble (String message) {
+        return Double.parseDouble(JOptionPane.showInputDialog(null, message , "Input", JOptionPane.PLAIN_MESSAGE).trim());
     }
     
-    public static double JOptionPaneDouble (String message) {
-        String valueString = JOptionPane.showInputDialog(null, message , "Input", JOptionPane.PLAIN_MESSAGE);
-        return Double.parseDouble(valueString.trim());
+    public static String JOptionPaneString (String message) {
+        return JOptionPane.showInputDialog(null, message , "Input", JOptionPane.PLAIN_MESSAGE).trim();
     }
 }

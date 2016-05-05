@@ -1,15 +1,9 @@
 public class Car
 {
-    private int entryDate;
-    private double entryTime;
-    private int endDate;
-    private double endTime;
-    private double price;
-    private double currentTime;
-    private int currentDate;
+    private double entryTime, endTime, price, currentTime, elapsedTime;
+    private int entryDate, endDate, currentDate;
 
     public Car(int entryDate, double entryTime) {
-        //validation required
         this.entryDate = entryDate;
         this.entryTime = entryTime;
     }
@@ -17,37 +11,27 @@ public class Car
     public void setPrice(int price) {
         this.price = price;
     }
-    
-    //getters 
-    public int getEntryDate() {
-        return entryDate;
-    }
 
-    public double getEntryTime() {
-        return entryTime;
-    }
+    //GETTERS
+    public int getEntryDate() { return entryDate; }
 
-    public double getPrice() {
-        return price;
-    } 
+    public double getEntryTime() { return entryTime; }
 
-    public int getEndDate() {
-        return endDate;
-    }
+    public double getPrice() { return price; } 
 
-    public double getEndTime() {
-        return endTime;
-    }
+    public int getEndDate() { return endDate; }
+
+    public double getEndTime() { return endTime; };
 
     //setters - modifiers
-    private void setEndDate(int endDate) {
+    public void setEndDate(int endDate) {
         //validation required
         if(endDate >= entryDate) {
             this.endDate = endDate;
         }
     }
 
-    private void setEndTime(double endTime) {
+    public void setEndTime(double endTime) {
         //validation required
         if(endTime >= entryTime || endDate > entryDate) {
             this.endTime = endTime;
@@ -72,14 +56,11 @@ public class Car
         return ((timeDifference /30) * 0.5);
     }
 
-    /*
-     * describe head parameters and how it works
-     */
-    public void payment(int endDate, double endTime) {
+    public double payment(int endDate, double endTime) {
         setEndDate(endDate);
         setEndTime(endTime);
         price = calcPrice();
-        System.out.println("Price: " + price);
+        return price;
 
     }
 
@@ -88,14 +69,13 @@ public class Car
         int currentMin = timeInMinutes(currentTime);
         int endMin = timeInMinutes(endTime);
         //when paying endTime i set to a value, it is not 0
-
         if(currentMin - endMin < 10 && endTime != 0) return true;
         if(endTime == 0 && currentMin - entryMin < 10) return true;
         return false;   
     }
 
     public String toString() {
-        return "entrTime: " + entryTime + "; entryDate: " + entryDate + "; endTime: " + endTime + "; endDate: " + endDate + "; price: " + price;
+        return "entryTime: " + entryTime + "; entryDate: " + entryDate + "; endTime: " + endTime + "; endDate: " + endDate + "; price: " + price;
     }
 }
 
