@@ -1,2 +1,4 @@
 # ParkingLot
-international baccalaureate Computer Science High Level Project
+Mario Simak 3.IBDA Gymnazium Jura Hronca
+
+International baccalaureate Computer Science High Level Project
