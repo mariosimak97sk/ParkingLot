@@ -23,6 +23,7 @@ public class Car
 
     public double getEndTime() { return endTime; };
 
+
     //setters - modifiers
     public void setEndDate(int endDate) {
         //validation required

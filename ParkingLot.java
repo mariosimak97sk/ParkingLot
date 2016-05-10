@@ -1,18 +1,20 @@
 import java.util.*;
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.Toolkit;
+import java.awt.Color;
 
 public class ParkingLot extends JFrame implements ActionListener
 {
     private String name, dateString;
     private int capacity, numOfOccupied, dateInt;
     private Car[] places;
-    private String[] date;
-    private JButton btEnter, btLeave, btPay, btDisplay, btExit;
+    private String[] date, numbers;
+    private JButton btEnter, btLeave, btPay, btDisplay, btExit, btClear;
     private JTextArea display;
-    private JLabel lbName, lbCapacity;
-    //javax.swing.Timer myTimer;
-    long duration;
+    private JLabel lbName, lbCapacity, lbDate, lbTime;
+    private static long timerStart, elapsedTime;
+    javax.swing.Timer myTimer;
 
     public ParkingLot(String name, int capacity) {
         super(name + " | Mario Simak");
@@ -21,8 +23,9 @@ public class ParkingLot extends JFrame implements ActionListener
         this.capacity = capacity;
         numOfOccupied = 0;
         places = new Car[capacity];
-        //myTimer = new javax.swing.Timer(500,this);
-        //myTimer.stop();
+        setIconImage(Toolkit.getDefaultToolkit().getImage("img/parkingLotIcon.png"));
+        myTimer = new javax.swing.Timer(500,this);
+        myTimer.stop();
 
         //TEXTAREA
         display = new JTextArea();
@@ -35,6 +38,7 @@ public class ParkingLot extends JFrame implements ActionListener
         String[] aparts = cal.getTime().toString().split(" ");
         String[] atime = aparts[3].split(":");
         date = new String[3];
+        numbers = new String[capacity];
         date[2] = Integer.toString(cal.get(Calendar.YEAR));
         date[1] = Integer.toString(cal.get(Calendar.MONTH)+1);
         date[0] = Integer.toString(cal.get(Calendar.DAY_OF_MONTH));
@@ -43,20 +47,29 @@ public class ParkingLot extends JFrame implements ActionListener
 
         //BUTTONS
         btEnter = new JButton("Enter");
+        btEnter.setBackground(Color.WHITE);
         btEnter.setBounds(20, 50, 100, 30);
         add(btEnter);
         btLeave = new JButton("Leave");
+        btLeave.setBackground(Color.WHITE);
         btLeave.setBounds(20, 90, 100, 30);
         add(btLeave);
         btPay = new JButton("Pay");
+        btPay.setBackground(Color.WHITE);
         btPay.setBounds(20, 130, 100, 30);
         add(btPay);
         btDisplay = new JButton("Display");
+        btDisplay.setBackground(Color.WHITE);
         btDisplay.setBounds(20, 170, 100, 30);
         add(btDisplay);
         btExit = new JButton("Exit");
+        btExit.setBackground(Color.WHITE);
         btExit.setBounds(20, 210, 100, 30);
         add(btExit);
+        btClear = new JButton("Clear");
+        btClear.setBackground(Color.WHITE);
+        btClear.setBounds(370, 250, 100, 30);
+        add(btClear);
 
         //ACTIONLISTENER
         btEnter.addActionListener(this);
@@ -64,6 +77,7 @@ public class ParkingLot extends JFrame implements ActionListener
         btPay.addActionListener(this);
         btDisplay.addActionListener(this);
         btExit.addActionListener(this);
+        btClear.addActionListener(this);
 
         //LABELS
         lbName = new JLabel(name);
@@ -72,19 +86,17 @@ public class ParkingLot extends JFrame implements ActionListener
         lbCapacity = new JLabel("Capacity: " + numOfOccupied + "/" + capacity);
         lbCapacity.setBounds(130, 20, 100, 30);
         add(lbCapacity);
-
-        /*LOGO
-        ImageIcon logo = new ImageIcon("C:/Users/Mario Simak/Downloads/bhi_parking_banner.jpg");
-        JLabel lbLogo = new JLabel("Hit boxes", logo, JLabel.CENTER);
-        lbLogo.setBounds(0, 0, 480, 150);
-        this.add(lbLogo);
-         */
+        lbDate = new JLabel("Date: " + date[0] + "/" + date[1] + "/" + date[2]);
+        lbDate.setBounds(310, 20, 100, 30); 
+        add(lbDate);
+        lbTime = new JLabel("Time: " + getTime());
+        lbTime.setBounds(400, 20, 100, 30);
+        add(lbTime);
     }
 
     public int getRandom() {
         int random;
         do {
-            // od 1 az po places.length -1
             random = new Random().nextInt(places.length);
         } while (places[random] != null);
         return random;
@@ -93,8 +105,6 @@ public class ParkingLot extends JFrame implements ActionListener
     public void enter () {
 
         if(numOfOccupied < capacity) {
-            display.append("You can enter." + "\n");
-
         }else{
             display.append("The ParkingLot is full." + "\n");
             btEnter.setEnabled(false);
@@ -102,59 +112,63 @@ public class ParkingLot extends JFrame implements ActionListener
 
         if(numOfOccupied < capacity) {
             int number = getRandom();
+            numbers[number] = Integer.toString(number);
+            places[number] = new Car(dateInt, this.getTime());
+            display.append("Your number is: " + number + "\n");
             numOfOccupied++;
             lbCapacity.setText("Capacity: " + numOfOccupied + "/" + capacity);
-            places[number] = new Car(dateInt, MyInput.JOptionPaneDouble("Enter time: "));
-            display.append("Your number is: " + number + "\n");
         }
     }
 
     public void pay () {
 
         try{
-            //MyInput.JOptionPaneDouble("Enter endTime: ")
-            int numOfCar = MyInput.JOptionPaneInt("Enter numOfCar: ");
-            places[numOfCar].payment(dateInt, MyInput.JOptionPaneDouble("Enter endTime: "));
+            int numOfCar = displayList();
+            //elapsedTime = System.currentTimeMillis()-places[numOfCar].getEndTime();
+            places[numOfCar].payment(dateInt, this.getTime());
             places[numOfCar].setPrice(0);
             display.append("Paid: " + places[numOfCar].getPrice() +  " You can now leave." + "\n");
-            //return true;
         }
         catch(NullPointerException npe){
-            System.out.println("No such car in the ParkingLot.");
-            //return false;
+            JOptionPane.showMessageDialog(null, npe.getMessage(), "No such car in the ParkingLot.", JOptionPane.ERROR_MESSAGE);
         }
         catch(ArrayIndexOutOfBoundsException aioobe){
-            System.out.println("No such car in the ParkingLot.");
-            //return false;
+            JOptionPane.showMessageDialog(null, aioobe.getMessage(), "No such car in the ParkingLot.", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void leave () {
 
-        try{    
-            int numOfCar2 = MyInput.JOptionPaneInt("Enter numOfCar: ");
-            if(places[numOfCar2] != null && places[numOfCar2].leave(dateInt, MyInput.JOptionPaneDouble("Enter endTime: ")) ) {
+        try{   
+            int numOfCar2 = displayList();
+            if(places[numOfCar2] != null && places[numOfCar2].leave(dateInt, this.getTime()) ) {
                 places[numOfCar2] = null;
                 numOfOccupied--;
                 display.append("You left the ParkingLot." + "\n");
+                lbCapacity.setText("Capacity: " + numOfOccupied + "/" + capacity);
+                numbers[numOfCar2] = null;
             }else{
                 display.append("You have to pay at first." + "\n");
             }
         }
         catch(NullPointerException npe){
-            System.out.println("No such car in the ParkingLot.");
+            JOptionPane.showMessageDialog(null, npe.getMessage(), "No such car in the ParkingLot.", JOptionPane.ERROR_MESSAGE);
         }
         catch(ArrayIndexOutOfBoundsException aioobe){
-            System.out.println("No such car in the ParkingLot.");
+            JOptionPane.showMessageDialog(null, aioobe.getMessage(), "No such car in the ParkingLot.", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     public void actionPerformed(ActionEvent ae) {
         if(ae.getSource() == btEnter) {
             enter();
+            if(numOfOccupied == capacity) {
+                btEnter.setEnabled(false);
+            }
         }else if(ae.getSource() == btLeave) {
             if(numOfOccupied != 0) {
                 leave();
+                btEnter.setEnabled(true);
             }
         }else if(ae.getSource() == btPay) {
             pay();
@@ -165,23 +179,33 @@ public class ParkingLot extends JFrame implements ActionListener
             }
 
         }else if(ae.getSource() == btExit) {
-            int result = JOptionPane.showConfirmDialog(null,"Are you sure you want to quit?","Confirm Quit", JOptionPane.YES_NO_CANCEL_OPTION);
+            int result = JOptionPane.showConfirmDialog(null,"Are you sure you want to quit?","Confirm Quit", JOptionPane.OK_CANCEL_OPTION);
             if (result == JOptionPane.YES_OPTION) System.exit(0);
+        }else if(ae.getSource() == btClear) {
+            display.setText("");
         }
 
-        /* if(ae.getSource() == myTimer){
-        myTimer.stop();
-        System.out.println(myTimer);
-        myTimer.start();
+        if(ae.getSource() == myTimer){
         }
-         */
     }
 
-    public static void main() {
+    public static void main(String args[]) {
         ParkingLot frame = new ParkingLot(MyInput.JOptionPaneString("Name of ParkingLot: "), MyInput.JOptionPaneInt("Capacity: "));
         frame.setSize(500, 400);
         frame.setVisible(true);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
+    }
+
+    public int displayList() {
+        String input = (String) JOptionPane.showInputDialog(null, "What is the number of your Car?", "Selection", JOptionPane.QUESTION_MESSAGE, null, numbers, numbers[0]);
+        return Integer.parseInt(input);
+    }
+
+    public static double getTime() {
+        timerStart = System.currentTimeMillis();
+        int minutes = (int) ((timerStart / (1000*60)) % 60);
+        int hours = (int) ((timerStart / (1000*60*60)) % 24);
+        return Double.parseDouble(hours + "." + minutes);
     }
 }
